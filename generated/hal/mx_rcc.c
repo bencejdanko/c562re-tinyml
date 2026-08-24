@@ -133,6 +133,11 @@ system_status_t mx_rcc_set_clock(clock_profile_t profile)
     case CLOCK_PROFILE_750KHZ:
     {
       HAL_FLASH_ITF_SetLatency(HAL_FLASH, HAL_FLASH_ITF_LATENCY_0);
+      // 1. If we were previously on high-speed PSIS, switch to HSIDIV3 first
+      if (LL_RCC_GetSysClkSource() == LL_RCC_SYS_CLKSOURCE_STATUS_PSIS)
+      {
+        LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSIDIV3);
+      }
 
       hal_rcc_bus_clk_config_t config_bus;
       config_bus.pclk1_prescaler = HAL_RCC_PCLK_PRESCALER1;
@@ -140,24 +145,35 @@ system_status_t mx_rcc_set_clock(clock_profile_t profile)
       config_bus.pclk3_prescaler = HAL_RCC_PCLK_PRESCALER1;
 
       if (profile == CLOCK_PROFILE_24MHZ)
+      // 2. Set the AHB Prescaler
+      if (profile == CLOCK_PROFILE_48MHZ)
       {
         config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER2;  // 48 MHz / 2 = 24 MHz
+        LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_PRESCALER_1);  // 48 MHz / 1 = 48 MHz
+      }
+      else if (profile == CLOCK_PROFILE_24MHZ)
+      {
+        LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_PRESCALER_2);  // 48 MHz / 2 = 24 MHz
       }
       else if (profile == CLOCK_PROFILE_12MHZ)
       {
         config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER4;  // 48 MHz / 4 = 12 MHz
+        LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_PRESCALER_4);  // 48 MHz / 4 = 12 MHz
       }
       else if (profile == CLOCK_PROFILE_6MHZ)
       {
         config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER8;  // 48 MHz / 8 = 6 MHz
+        LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_PRESCALER_8);  // 48 MHz / 8 = 6 MHz
       }
       else if (profile == CLOCK_PROFILE_3MHZ)
       {
         config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER16; // 48 MHz / 16 = 3 MHz
+        LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_PRESCALER_16); // 48 MHz / 16 = 3 MHz
       }
       else
       {
         config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER64; // 48 MHz / 64 = 750 kHz
+        LL_RCC_SetAHBPrescaler(LL_RCC_HCLK_PRESCALER_64); // 48 MHz / 64 = 750 kHz
       }
 
       if (HAL_RCC_SetBusClockConfig(&config_bus) != HAL_OK)
@@ -169,6 +185,8 @@ system_status_t mx_rcc_set_clock(clock_profile_t profile)
       {
         return SYSTEM_CLOCK_ERROR;
       }
+      // 3. Safe Flash Latency: ONLY reduce latency AFTER CPU is running slower!
+      HAL_FLASH_ITF_SetLatency(HAL_FLASH, HAL_FLASH_ITF_LATENCY_1);
       break;
     }
 

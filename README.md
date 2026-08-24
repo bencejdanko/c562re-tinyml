@@ -54,8 +54,10 @@ Specify build target file w/ `cmake/files.cmake`
 
 Compile the binary: 
 
-```
+```bash
+# when you add new files
 cmake --preset debug_GCC_NUCLEO-C562RE
+
 cmake --build --preset debug_GCC_NUCLEO-C562RE
 ```
 

@@ -97,8 +97,8 @@ namespace mcal
     constexpr std::uint32_t gpioa_odr   = 0x42020000UL + 0x14UL;
     constexpr std::uint32_t gpioa_bsrr  = 0x42020000UL + 0x18UL;
 
-    // AHB3 Base: 0x44000000UL, RCC Base: 0x44000C00UL
-    constexpr std::uint32_t rcc_ahb2enr = 0x44000C00UL + 0x8CUL;
+    // AHB3 Base: 0x44020000UL, RCC Base: 0x44020C00UL
+    constexpr std::uint32_t rcc_ahb2enr = 0x44020C00UL + 0x8CUL;
     constexpr std::uint32_t rcc_ahb2enr_gpioaen = 0x01UL;
   }
 }

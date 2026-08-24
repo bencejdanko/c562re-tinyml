@@ -2,9 +2,27 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "ST-Link Debug (c562re)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "Cortex-Debug: ST-Link (c562re)",
+            "servertype": "stlink",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/debug_GCC_NUCLEO-C562RE/c562re.elf",
+            "armToolchainPath": "/home/bence/.local/share/stm32cube/bundles/gnu-gdb-for-stm32/14.3.1+st.2/bin",
+            "stlinkPath": "/home/bence/.local/share/stm32cube/bundles/stlink-gdbserver/7.14.0+st.2/bin/ST-LINK_gdbserver",
+            "stm32cubeprogrammer": "/home/bence/.local/share/stm32cube/bundles/programmer/2.23.0/bin",
+            "serverArgs": [
+                "-m", "1"
+            ],
+            "device": "STM32C562RE",
+            "preLaunchTask": "CMake Build",
+            "runToEntryPoint": "main"
+        },
+        {
             "type": "stlinkgdbtarget",
             "request": "launch",
-            "name": "STM32Cube: Launch ST-Link GDB Server",
+            "name": "STM32Cube: ST-Link GDB Server (c562re)",
             "origin": "snippet",
             "cwd": "${workspaceFolder}",
             "preBuild": "${command:st-stm32-ide-debug-launch.build}",
@@ -15,7 +33,7 @@
             },
             "imagesAndSymbols": [
                 {
-                    "imageFileName": "${command:st-stm32-ide-debug-launch.get-projects-binary-from-context1}"
+                    "imageFileName": "${workspaceFolder}/build/debug_GCC_NUCLEO-C562RE/c562re.elf"
                 }
             ]
         }

@@ -109,6 +109,10 @@ namespace
   // Also hardware timers
   // DWT CYCCNT also counts exact # cycles
 
+  // e.g we typically just want to use the dedicated register
+  // 1.0 millisecond interupts
+  // we'll do zero allocation approach later
+
   void delay_loop()
   {
     for(std::uint32_t i = 0U; i < 400000UL; ++i)
@@ -137,7 +141,7 @@ int main()
   //   mx_rcc_set_clock(CLOCK_PROFILE_6MHZ);   //   6 MHz
   //   mx_rcc_set_clock(CLOCK_PROFILE_3MHZ);   //   3 MHz
   //   mx_rcc_set_clock(CLOCK_PROFILE_750KHZ); // 750 kHz
-  mx_rcc_set_clock(CLOCK_PROFILE_750KHZ);
+  mx_rcc_set_clock(CLOCK_PROFILE_6MHZ);
 
   // Forever-loop: toggle the LED object
   for(;;)
