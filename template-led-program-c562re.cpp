@@ -3,11 +3,23 @@
 // OOP approach. `led` class encapsulates hardware details.
 // `main()` calls led class.
 
+// This is a baseline approach that needs improvements 
+// For instance, the OOP class is dynamic, where
+// port, moder, bindex are in RAM
+
 #include <cstdint>
 
 // we will describe mappings better
 // in later examples 
 #include "mcal_reg.h"
+
+#include "mx_rcc.h"
+// generated/hal/mx_rcc.c
+// include the pre-generated configuration
+// for setting the clock speeds
+// allows for: 36 MHz, 48 MHz, 72 MHz, 144 MHz, 160 MHz
+// modified so ENUM configurable in main()
+
 
 // The Object-Oriented LED class
 // microcontroller starts in a low power default state
@@ -116,6 +128,17 @@ namespace
 
 int main()
 {
+  //   mx_rcc_set_clock(CLOCK_PROFILE_160MHZ); // 160 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_144MHZ); // 144 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_100MHZ); // 100 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_48MHZ);  //  48 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_24MHZ);  //  24 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_12MHZ);  //  12 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_6MHZ);   //   6 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_3MHZ);   //   3 MHz
+  //   mx_rcc_set_clock(CLOCK_PROFILE_750KHZ); // 750 kHz
+  mx_rcc_set_clock(CLOCK_PROFILE_750KHZ);
+
   // Forever-loop: toggle the LED object
   for(;;)
   {

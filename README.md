@@ -32,11 +32,13 @@ arm-none-eabi-g++ \         # cross compiler -- arm target, no os (bare metal),
                             # automatically discarded by the linker
 ```
 
-In `cmake/files.cmake` you can specify which project to compile (e.g. main.cpp)
-
 ## Approaches
 
-ST32Micro uses C HAL approach, so there are heavy C libraries to interface with say, `HAL_GPIO_WritePin` or `HAL_UART_Transmit`. We also want to introduce type safe OOP abstractions over hardware registers w/ templates, constexpr
+ST32Micro uses a C HAL approach, so there are heavy C libraries to interface with say, `HAL_GPIO_WritePin` or `HAL_UART_Transmit`. They focus on C99 / ANSI C because it is practically compatible with every compiler. C is also predominately used in libraries (FreeRTOS, ThreadX/Azure RTOS, Zephyr, NuttX, CMSIS-RTOS), and C has a well defined ABI.
+
+However, this all comes at the cost of weak type safety, high RAM usage because of state machines / dynamic callbacks, poorer performance, runtime errors. But it has mass compatibility / code generation simplicity with MX2 / C interop
+
+This gives an excellent exercise opportunity to implement clean C++ approaches w/ type safety, OOP abstractions over hardware registers w/ templates, constexpr. 
 
 We explore both
 
@@ -45,6 +47,8 @@ We explore both
 ```
 template-led-program-c562re.cpp     # LED example
 ```
+
+Specify build target file w/ `cmake/files.cmake` 
 
 ## Ubuntu
 

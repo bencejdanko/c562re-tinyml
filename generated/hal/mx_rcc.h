@@ -28,6 +28,19 @@ extern "C" {
 #include "mx_def.h"
 
 /* Exported types ------------------------------------------------------------*/
+typedef enum
+{
+  CLOCK_PROFILE_160MHZ = 0, /*!< 160 MHz - Maximum performance (PSI Synthesizer) */
+  CLOCK_PROFILE_144MHZ,     /*!< 144 MHz - High performance (PSI Synthesizer)    */
+  CLOCK_PROFILE_100MHZ,     /*!< 100 MHz - Balanced high performance (PSI)       */
+  CLOCK_PROFILE_48MHZ,      /*!<  48 MHz - Standard default clock (HSIDIV3)       */
+  CLOCK_PROFILE_24MHZ,      /*!<  24 MHz - Medium power (HSI / 2)                 */
+  CLOCK_PROFILE_12MHZ,      /*!<  12 MHz - Low power (HSI / 4)                    */
+  CLOCK_PROFILE_6MHZ,       /*!<   6 MHz - Very low power (HSI / 8)               */
+  CLOCK_PROFILE_3MHZ,       /*!<   3 MHz - Ultra low power (HSI / 16)             */
+  CLOCK_PROFILE_750KHZ,     /*!< 750 kHz - Deep sub-MHz low power (HSI / 64)      */
+} clock_profile_t;
+
 /* Exported constants --------------------------------------------------------*/
 
 /** Primary aliases for RCC_OSC_IN pin */
@@ -43,6 +56,7 @@ extern "C" {
 /* Exported functions for RCC in HAL layer */
 /******************************************************************************/
 system_status_t mx_rcc_init(void);
+system_status_t mx_rcc_set_clock(clock_profile_t profile);
 void mx_rcc_deinit(void);
 
 system_status_t mx_rcc_peripherals_clock_config(void);

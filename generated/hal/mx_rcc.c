@@ -41,56 +41,152 @@
   *            APB3 Prescaler                 = 1
   *            Flash Latency(WS)              = 4
   */
-system_status_t mx_rcc_init(void)
+/**
+  * @brief  Explicitly configure and switch the system core clock.
+  * @param  profile  Target clock profile (e.g. CLOCK_PROFILE_160MHZ, CLOCK_PROFILE_6MHZ)
+  * @retval system_status_t (SYSTEM_OK or SYSTEM_CLOCK_ERROR)
+  */
+system_status_t mx_rcc_set_clock(clock_profile_t profile)
 {
-  if (HAL_RCC_HSE_Enable(HAL_RCC_HSE_ON) != HAL_OK)
+  switch (profile)
   {
-    return SYSTEM_CLOCK_ERROR;
+    case CLOCK_PROFILE_160MHZ:
+    case CLOCK_PROFILE_144MHZ:
+    case CLOCK_PROFILE_100MHZ:
+    {
+      if (HAL_RCC_HSE_Enable(HAL_RCC_HSE_ON) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+
+      hal_rcc_psi_config_t config_psi;
+      config_psi.psi_source = HAL_RCC_PSI_SRC_HSE;
+      config_psi.psi_ref    = HAL_RCC_PSI_REF_24MHZ;
+
+      if (profile == CLOCK_PROFILE_160MHZ)
+      {
+        config_psi.psi_out = HAL_RCC_PSI_OUT_160MHZ; // 160 MHz
+      }
+      else if (profile == CLOCK_PROFILE_144MHZ)
+      {
+        config_psi.psi_out = HAL_RCC_PSI_OUT_144MHZ; // 144 MHz
+      }
+      else
+      {
+        config_psi.psi_out = HAL_RCC_PSI_OUT_100MHZ; // 100 MHz
+      }
+
+      if (HAL_RCC_PSI_SetConfig(&config_psi) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+
+      if (HAL_RCC_PSIS_Enable() != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+
+      hal_rcc_bus_clk_config_t config_bus;
+      config_bus.hclk_prescaler  = HAL_RCC_HCLK_PRESCALER1;
+      config_bus.pclk1_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      config_bus.pclk2_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      config_bus.pclk3_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      if (HAL_RCC_SetBusClockConfig(&config_bus) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+
+      // Safe flash latency for high speed >= 100 MHz
+      HAL_FLASH_ITF_SetLatency(HAL_FLASH, HAL_FLASH_ITF_LATENCY_4);
+
+      if (HAL_RCC_SetSYSCLKSource(HAL_RCC_SYSCLK_SRC_PSIS) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+
+      HAL_FLASH_ITF_SetProgrammingDelay(HAL_FLASH, HAL_FLASH_ITF_PROGRAM_DELAY_2);
+      break;
+    }
+
+    case CLOCK_PROFILE_48MHZ:
+    {
+      HAL_FLASH_ITF_SetLatency(HAL_FLASH, HAL_FLASH_ITF_LATENCY_1);
+
+      hal_rcc_bus_clk_config_t config_bus;
+      config_bus.hclk_prescaler  = HAL_RCC_HCLK_PRESCALER1;
+      config_bus.pclk1_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      config_bus.pclk2_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      config_bus.pclk3_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      (void)HAL_RCC_SetBusClockConfig(&config_bus);
+
+      if (HAL_RCC_SetSYSCLKSource(HAL_RCC_SYSCLK_SRC_HSIDIV3) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+      break;
+    }
+
+    case CLOCK_PROFILE_24MHZ:
+    case CLOCK_PROFILE_12MHZ:
+    case CLOCK_PROFILE_6MHZ:
+    case CLOCK_PROFILE_3MHZ:
+    case CLOCK_PROFILE_750KHZ:
+    {
+      HAL_FLASH_ITF_SetLatency(HAL_FLASH, HAL_FLASH_ITF_LATENCY_0);
+
+      hal_rcc_bus_clk_config_t config_bus;
+      config_bus.pclk1_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      config_bus.pclk2_prescaler = HAL_RCC_PCLK_PRESCALER1;
+      config_bus.pclk3_prescaler = HAL_RCC_PCLK_PRESCALER1;
+
+      if (profile == CLOCK_PROFILE_24MHZ)
+      {
+        config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER2;  // 48 MHz / 2 = 24 MHz
+      }
+      else if (profile == CLOCK_PROFILE_12MHZ)
+      {
+        config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER4;  // 48 MHz / 4 = 12 MHz
+      }
+      else if (profile == CLOCK_PROFILE_6MHZ)
+      {
+        config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER8;  // 48 MHz / 8 = 6 MHz
+      }
+      else if (profile == CLOCK_PROFILE_3MHZ)
+      {
+        config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER16; // 48 MHz / 16 = 3 MHz
+      }
+      else
+      {
+        config_bus.hclk_prescaler = HAL_RCC_HCLK_PRESCALER64; // 48 MHz / 64 = 750 kHz
+      }
+
+      if (HAL_RCC_SetBusClockConfig(&config_bus) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+
+      if (HAL_RCC_SetSYSCLKSource(HAL_RCC_SYSCLK_SRC_HSIDIV3) != HAL_OK)
+      {
+        return SYSTEM_CLOCK_ERROR;
+      }
+      break;
+    }
+
+    default:
+      return SYSTEM_CLOCK_ERROR;
   }
-
-    hal_rcc_psi_config_t config_psi;
-  config_psi.psi_source = HAL_RCC_PSI_SRC_HSE;
-  config_psi.psi_ref = HAL_RCC_PSI_REF_24MHZ;
-  config_psi.psi_out = HAL_RCC_PSI_OUT_144MHZ;
-  if (HAL_RCC_PSI_SetConfig(&config_psi) != HAL_OK)
-  {
-    return SYSTEM_CLOCK_ERROR;
-  }
-
-  if (HAL_RCC_PSIS_Enable() != HAL_OK)
-  {
-    return SYSTEM_CLOCK_ERROR;
-  }
-
-  /** Initializes the CPU, AHB and APB busses clocks */
-  hal_rcc_bus_clk_config_t config_bus;
-  config_bus.hclk_prescaler  = HAL_RCC_HCLK_PRESCALER1;
-  config_bus.pclk1_prescaler = HAL_RCC_PCLK_PRESCALER1;
-  config_bus.pclk2_prescaler = HAL_RCC_PCLK_PRESCALER1;
-  config_bus.pclk3_prescaler = HAL_RCC_PCLK_PRESCALER1;
-  if (HAL_RCC_SetBusClockConfig(&config_bus) != HAL_OK)
-  {
-    return SYSTEM_CLOCK_ERROR;
-  }
-
-  /** Frequency will be increased */
-  HAL_FLASH_ITF_SetLatency(HAL_FLASH, HAL_FLASH_ITF_LATENCY_4);
-
-  if (HAL_RCC_SetSYSCLKSource(HAL_RCC_SYSCLK_SRC_PSIS) != HAL_OK)
-  {
-    return SYSTEM_CLOCK_ERROR;
-  }
-
-  HAL_FLASH_ITF_SetProgrammingDelay(HAL_FLASH, HAL_FLASH_ITF_PROGRAM_DELAY_2);
 
   if (HAL_UpdateCoreClock() != HAL_OK)
   {
     return SYSTEM_CLOCK_ERROR;
   }
 
-  /* No GPIO configuration required for RCC */
-
   return SYSTEM_OK;
+}
+
+system_status_t mx_rcc_init(void)
+{
+  return mx_rcc_set_clock(CLOCK_PROFILE_144MHZ);
 }
 
 void mx_rcc_deinit(void)
