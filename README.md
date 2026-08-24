@@ -48,7 +48,14 @@ We explore both
 template-led-program-c562re.cpp     # LED example
 ```
 
-Specify build target file w/ `cmake/files.cmake` 
+Specify build target file w/ `cmake/files.cmake`.
+
+The device has 128KB total SRAM that must be balanced between heap and stack allocations. See `user_modifiable/Device/STM32C562RET6/stm32c562xe_flash.ld` to modify 
+
+```ld
+HEAP_SIZE = 0x2000;
+STACK_SIZE = 0x4000;
+```
 
 ## Ubuntu
 
