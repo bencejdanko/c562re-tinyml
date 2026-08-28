@@ -1,94 +1,77 @@
 # Real Time and Efficient C++ on the STM32C562RE
 
-The original template code is available at https://github.com/bencejdanko/nucleo-c562re-workshop. It features a blinking LED, saving ADC data to EEPROM via button, UART communication
-
-This guide hopes to demonstrate
-
-- Template-based register access
-- Static polymorphism & zero-cost abstractions
-- Object-oriented peripheral drivers (GPIO, UART, Timers)
-- Custom fixed-size containers & memory pools
-- Real-time multitasking & scheduler
-
-## CMake
-
-In `cmake/flags.cmake`, set to compile with 
-
-```bash
-arm-none-eabi-g++ \         # cross compiler -- arm target, no os (bare metal),
-                            # embedded application binary enterface, 
-                            # G++ compiler front end
-    -std=c++20 \            # C++20 Standard
-    -fno-rtti \             # Disable Run Time Type Information
-                            # Disables Metadata tables
-    -fno-exceptions \       # exceptions bloat the stack, 
-                            # have undeterministic timing,
-                            # dynamic memory overflows
-                            # better to use std::abort() or handler 
-    -ffunction-sections \   # 
-    -fdata-sections         # functions placed in isolated section
-    Wl,--gc-sections        # garbage collect unused sections
-                            # drivers not called by main .cpp is
-                            # automatically discarded by the linker
-```
-
-## Approaches
-
-ST32Micro uses a C HAL approach, so there are heavy C libraries to interface with say, `HAL_GPIO_WritePin` or `HAL_UART_Transmit`. They focus on C99 / ANSI C because it is practically compatible with every compiler. C is also predominately used in libraries (FreeRTOS, ThreadX/Azure RTOS, Zephyr, NuttX, CMSIS-RTOS), and C has a well defined ABI.
-
-However, this all comes at the cost of weak type safety, high RAM usage because of state machines / dynamic callbacks, poorer performance, runtime errors. But it has mass compatibility / code generation simplicity with MX2 / C interop
-
-This gives an excellent exercise opportunity to implement clean C++ approaches w/ type safety, OOP abstractions over hardware registers w/ templates, constexpr. 
-
-We explore both
-
-## Current programs
+## Programs
 
 ```
-template-led-program-c562re.cpp     # LED example
+src/c562re-template-led-program.cpp     # LED example
+src/c562re-rle-encoding-decoding.cpp    # RLE compression example
 ```
 
+## Configuration
+
+Set flags in `cmake/flags.cmake`
 Specify build target file w/ `cmake/files.cmake`.
+Modify heap and stack allocations in `user_modifiable/Device/STM32C562RET6/stm32c562xe_flash.ld`
 
-The device has 128KB total SRAM that must be balanced between heap and stack allocations. See `user_modifiable/Device/STM32C562RET6/stm32c562xe_flash.ld` to modify 
+## Requirements
 
-```ld
-HEAP_SIZE = 0x2000;
-STACK_SIZE = 0x4000;
-```
+- cmake
+- ninja
+- arm-none-eabi-gcc
+- arm-none-eabi-g++
+- openocd
+- gdb-multiarch
+- arm-none-eabi-gdb
+- clang-format
 
-## Ubuntu
+Testing also depends on the Pigweed framework. Use the submodule to get the exact version.
 
-Compile the binary: 
+## Build and Flash
+
+Select which file to build in `cmake/files.cmake`.
 
 ```bash
-# when you add new files
+# Build with
 cmake --preset debug_GCC_NUCLEO-C562RE
-
 cmake --build --preset debug_GCC_NUCLEO-C562RE
+
+# Check memory sizes
+cmake --build --preset debug_GCC_NUCLEO-C562RE --target size
+
+# Flash to the board
+cmake --build --preset debug_GCC_NUCLEO-C562RE --target flash
+
+# Start OpenOCD GDB server
+cmake --build --preset debug_GCC_NUCLEO-C562RE --target openocd
+
+# Launch GDB
+cmake --build --preset debug_GCC_NUCLEO-C562RE --target debug
+
+# Auto-format source files
+cmake --build --preset debug_GCC_NUCLEO-C562RE --target format
 ```
 
-Flash to the board:
+## Host Unit Testing
 
 ```bash
-# this creates workshop.elf -- Executable and Linkable Format
-# .text -- machine code
-# .rodata, .data -- constants and data
-# Memory map headers
-# debug symbols for setting breakpoints
-# Rename the genned executable in CMakeLists.txt
-
-# We connect via SWD (Serial Wire Debug), w wire hardware interface
-# via onboard STLink programmer
-# -w erases flash mem and writes to internal flash mem 
-# -v verifies for non-corruption
-# -rst simple reset so it reboots w/ new program
-
-~/.local/share/stm32cube/bundles/programmer/2.23.0/bin/STM32_Programmer_CLI \
-    -c port=SWD \
-    -w build/debug_GCC_NUCLEO-C562RE/c562re.elf \
-    -v \
-    -rst
+# Configure and run unit tests on host PC
+cmake -B build/host_test -S tests -G Ninja
+cmake --build build/host_test
+ctest --test-dir build/host_test --output-on-failure
 ```
 
+Also configured as Github Action jobs.
 
+All unit tests located in `tests/unit/*`.
+
+## MCU Testing
+
+I/O has been configured with `src/pw_sys_io_stm32.cpp`. Correctness of tests relayed through UART.
+
+All hardware-level tests located in `tests/target/*`
+
+Use the below script to orchestrate a hardware testing run (requires the C562RE to be connected):
+
+```bash
+python3 tests/target/run_target_tests.py
+```

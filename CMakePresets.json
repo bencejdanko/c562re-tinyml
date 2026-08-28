@@ -11,7 +11,17 @@
             "name": "debug_GCC_NUCLEO-C562RE",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "${presetName}",
-                "TOOLCHAIN_FILE": "GCC.14.3.1.cmake"
+                "TOOLCHAIN_FILE": "GCC.14.3.1.cmake",
+                "BUILD_TARGET_TESTS": "OFF"
+            },
+            "inherits": "default"
+        },
+        {
+            "name": "target_test_NUCLEO-C562RE",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "debug_GCC_NUCLEO-C562RE",
+                "TOOLCHAIN_FILE": "GCC.14.3.1.cmake",
+                "BUILD_TARGET_TESTS": "ON"
             },
             "inherits": "default"
         }
@@ -25,6 +35,10 @@
         {
             "name": "debug_GCC_NUCLEO-C562RE",
             "configurePreset": "debug_GCC_NUCLEO-C562RE"
+        },
+        {
+            "name": "target_test_NUCLEO-C562RE",
+            "configurePreset": "target_test_NUCLEO-C562RE"
         }
     ]
 }
