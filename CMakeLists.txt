@@ -92,7 +92,7 @@ if(GDB_BIN)
   )
 endif()
 
-# Native CMake Format target
+# Native CMake Format & Check-Format targets
 find_program(CLANG_FORMAT_BIN clang-format)
 if(CLANG_FORMAT_BIN)
   file(GLOB_RECURSE PROJECT_FORMAT_SOURCES
@@ -100,10 +100,18 @@ if(CLANG_FORMAT_BIN)
     ${CMAKE_SOURCE_DIR}/src/*.hpp
     ${CMAKE_SOURCE_DIR}/src/*.c
     ${CMAKE_SOURCE_DIR}/src/*.h
+    ${CMAKE_SOURCE_DIR}/tests/*.cpp
+    ${CMAKE_SOURCE_DIR}/tests/*.hpp
+    ${CMAKE_SOURCE_DIR}/tests/*.c
+    ${CMAKE_SOURCE_DIR}/tests/*.h
   )
   add_custom_target(format
     COMMAND ${CLANG_FORMAT_BIN} -i ${PROJECT_FORMAT_SOURCES}
-    COMMENT "Formatting src/ with clang-format..."
+    COMMENT "Formatting src/ and tests/ with clang-format..."
+  )
+  add_custom_target(check-format
+    COMMAND ${CLANG_FORMAT_BIN} --dry-run --Werror ${PROJECT_FORMAT_SOURCES}
+    COMMENT "Checking clang-format compliance across src/ and tests/..."
   )
 endif()
 

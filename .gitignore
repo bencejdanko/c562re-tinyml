@@ -3,3 +3,10 @@ mx.scratch
 !.settings
 .gdb_history
 compile_commands.json
+.venv
+__pycache__
+.pytest_cache
+*.swp
+*.swo
+.*.sw?
+*~

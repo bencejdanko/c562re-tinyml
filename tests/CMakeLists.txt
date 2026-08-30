@@ -5,9 +5,23 @@ project(c562re_tests CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+add_compile_options(
+  -Wall
+  -Wextra
+  -Wpedantic
+  -Wconversion
+  -Wsign-conversion
+  -Wshadow
+  -fsanitize=address,undefined
+  -fno-omit-frame-pointer
+  -g
+)
+add_link_options(
+  -fsanitize=address,undefined
+)
+
 enable_testing()
 
-# Pigweed include directories and library for host unit testing
 set(PW_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/pigweed)
 
 add_library(pw_unit_test_host STATIC
@@ -46,19 +60,31 @@ target_include_directories(pw_unit_test_host PUBLIC
   ${PW_DIR}/third_party/fuchsia/repo/sdk/lib/stdcompat/include
 )
 
-# Test executable for RLE Codec and Buffer unit tests
-add_executable(test_rle
-  unit/test_rle.cpp
-)
-target_include_directories(test_rle PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
-target_link_libraries(test_rle PRIVATE pw_unit_test_host)
-add_test(NAME test_rle COMMAND test_rle)
+# Auto-discover unit tests via a test_ prefix.
+file(GLOB UNIT_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/unit/test_*.cpp")
 
-# Test executable for MCAL Register Mock tests
-add_executable(test_gpio_mcal
-  unit/test_gpio_mcal.cpp
-)
-target_include_directories(test_gpio_mcal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
-target_link_libraries(test_gpio_mcal PRIVATE pw_unit_test_host)
-add_test(NAME test_gpio_mcal COMMAND test_gpio_mcal)
+foreach(TEST_SRC ${UNIT_TEST_SOURCES})
+  get_filename_component(TEST_NAME ${TEST_SRC} NAME_WE)
+
+  add_executable(${TEST_NAME} ${TEST_SRC})
+  target_include_directories(${TEST_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
+  target_link_libraries(${TEST_NAME} PRIVATE pw_unit_test_host)
+  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
+
+find_program(CLANG_FORMAT_BIN clang-format)
+if(CLANG_FORMAT_BIN)
+  file(GLOB_RECURSE TEST_FORMAT_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+  )
+  add_test(
+    NAME clang_format_check
+    COMMAND ${CLANG_FORMAT_BIN} --dry-run --Werror ${TEST_FORMAT_SOURCES}
+  )
+endif()
+
+
 
