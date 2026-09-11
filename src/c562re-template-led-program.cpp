@@ -34,7 +34,10 @@ public:
     *reinterpret_cast<volatile port_type*>(port) |= ~(1UL << bindex);
   }
 
-  void toggle() const { *reinterpret_cast<volatile port_type*>(port) ^= (1UL << bindex); }
+  void toggle() const
+  {
+    *reinterpret_cast<volatile port_type*>(port) ^= (1UL << bindex);
+  }
 
 private:
   const port_type port;    // ODR address

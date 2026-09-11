@@ -29,7 +29,10 @@ struct fixed_buffer
 
   void clear() { size = 0; }
 
-  std::span<const T> view() const { return std::span<const T>(data.data(), size); }
+  std::span<const T> view() const
+  {
+    return std::span<const T>(data.data(), size);
+  }
 };
 
 // Basic struct for holding RLE representations.
@@ -65,7 +68,8 @@ inline uint8_t step_generator(uint8_t run_length)
 
 // RLE compressor algorithm.
 template<std::size_t MaxTokens>
-bool rle_compress(std::span<const std::uint8_t> input, fixed_buffer<rle_token, MaxTokens>& output)
+bool rle_compress(std::span<const std::uint8_t> input,
+                  fixed_buffer<rle_token, MaxTokens>& output)
 {
   output.clear();
   if (input.empty()) return true;
@@ -92,7 +96,8 @@ bool rle_compress(std::span<const std::uint8_t> input, fixed_buffer<rle_token, M
 
 // RLE decompressor algorithm.
 template<std::size_t MaxTokens>
-bool rle_decompress(const fixed_buffer<rle_token, MaxTokens>& input, std::span<std::uint8_t> output)
+bool rle_decompress(const fixed_buffer<rle_token, MaxTokens>& input,
+                    std::span<std::uint8_t> output)
 {
   if (input.size == 0) return true;
 

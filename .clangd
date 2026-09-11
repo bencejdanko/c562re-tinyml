@@ -1,2 +1,8 @@
 CompileFlags:
   CompilationDatabase: build/debug_GCC_NUCLEO-C562RE
+---
+# Target-test sources are only compiled by the target_test preset.
+If:
+  PathMatch: (tests/target/.*|src/pw_sys_io_.*)
+CompileFlags:
+  CompilationDatabase: build/target_test_NUCLEO-C562RE

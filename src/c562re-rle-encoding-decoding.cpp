@@ -10,7 +10,10 @@
 class periodic_timer
 {
 public:
-  explicit periodic_timer(uint32_t period_ms) : period(period_ms), last_time(HAL_GetTick()) {}
+  explicit periodic_timer(uint32_t period_ms)
+      : period(period_ms), last_time(HAL_GetTick())
+  {
+  }
 
   bool timeout()
   {

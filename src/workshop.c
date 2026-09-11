@@ -49,9 +49,10 @@ static void ButtonPressed(hal_exti_handle_t* hexti, hal_exti_trigger_t trigger);
 int main(void)
 {
   /** System Init: this code placed in targets folder initializes your system.
-   * It calls the initialization (and sets the initial configuration) of the peripherals.
-   * You can use STM32CubeMX to generate and call this code or not in this project.
-   * It also contains the HAL initialization and the initial clock configuration.
+   * It calls the initialization (and sets the initial configuration) of the
+   * peripherals. You can use STM32CubeMX to generate and call this code or not
+   * in this project. It also contains the HAL initialization and the initial
+   * clock configuration.
    */
   if (mx_system_init() != SYSTEM_OK)
   {
@@ -76,7 +77,8 @@ int main(void)
 
     HAL_ADC_Start(hadc1);
     HAL_ADC_Calibrate(hadc1);
-    HAL_ADC_REG_StartConv_DMA(hadc1, (uint8_t*)adc_buffer, 8 * sizeof(uint16_t));
+    HAL_ADC_REG_StartConv_DMA(hadc1, (uint8_t*)adc_buffer,
+                              8 * sizeof(uint16_t));
 
     /* Print Hello World on startup */
     printf("\r\n========================================\r\n");
@@ -99,8 +101,9 @@ int __io_putchar(int ch)
 static void ButtonPressed(hal_exti_handle_t* hexti, hal_exti_trigger_t trigger)
 {
   HAL_FLASH_ITF_Unlock(HAL_FLASH);
-  HAL_FLASH_EDATA_EraseByAddr(hflash, EDATAStartAddr, FLASH_EDATA_PAGE_SIZE, 0xFFFF);
-  HAL_FLASH_EDATA_ProgramByAddr(hflash, EDATAStartAddr, (uint32_t*)adc_buffer, 8 * sizeof(uint16_t),
-                                0xFFFF);
+  HAL_FLASH_EDATA_EraseByAddr(hflash, EDATAStartAddr, FLASH_EDATA_PAGE_SIZE,
+                              0xFFFF);
+  HAL_FLASH_EDATA_ProgramByAddr(hflash, EDATAStartAddr, (uint32_t*)adc_buffer,
+                                8 * sizeof(uint16_t), 0xFFFF);
   printf("ADC Data Saved in Emulated EEPROM\r\n");
 }

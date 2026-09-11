@@ -18,7 +18,8 @@ namespace reg
 template<typename RegisterAddressType, typename RegisterValueType>
 struct reg_access_dynamic final
 {
-  static void reg_set(const RegisterAddressType address, const RegisterValueType val)
+  static void reg_set(const RegisterAddressType address,
+                      const RegisterValueType val)
   {
     *reinterpret_cast<volatile RegisterValueType*>(address) = val;
   }
@@ -28,29 +29,34 @@ struct reg_access_dynamic final
     return *reinterpret_cast<volatile RegisterValueType*>(address);
   }
 
-  static void reg_or(const RegisterAddressType address, const RegisterValueType val)
+  static void reg_or(const RegisterAddressType address,
+                     const RegisterValueType val)
   {
     *reinterpret_cast<volatile RegisterValueType*>(address) |= val;
   }
 
-  static void reg_and(const RegisterAddressType address, const RegisterValueType val)
+  static void reg_and(const RegisterAddressType address,
+                      const RegisterValueType val)
   {
     *reinterpret_cast<volatile RegisterValueType*>(address) &= val;
   }
 
-  static void bit_set(const RegisterAddressType address, const RegisterValueType bit_pos)
+  static void bit_set(const RegisterAddressType address,
+                      const RegisterValueType bit_pos)
   {
     *reinterpret_cast<volatile RegisterValueType*>(address) |=
         static_cast<RegisterValueType>(1ULL << bit_pos);
   }
 
-  static void bit_clr(const RegisterAddressType address, const RegisterValueType bit_pos)
+  static void bit_clr(const RegisterAddressType address,
+                      const RegisterValueType bit_pos)
   {
     *reinterpret_cast<volatile RegisterValueType*>(address) &=
         static_cast<RegisterValueType>(~(1ULL << bit_pos));
   }
 
-  static void bit_not(const RegisterAddressType address, const RegisterValueType bit_pos)
+  static void bit_not(const RegisterAddressType address,
+                      const RegisterValueType bit_pos)
   {
     *reinterpret_cast<volatile RegisterValueType*>(address) ^=
         static_cast<RegisterValueType>(1ULL << bit_pos);
@@ -63,11 +69,20 @@ template<typename RegisterAddressType, typename RegisterValueType,
          const RegisterValueType value = static_cast<RegisterValueType>(0)>
 struct reg_access_static final
 {
-  static void reg_set() { *reinterpret_cast<volatile RegisterValueType*>(address) = value; }
+  static void reg_set()
+  {
+    *reinterpret_cast<volatile RegisterValueType*>(address) = value;
+  }
 
-  static void reg_or() { *reinterpret_cast<volatile RegisterValueType*>(address) |= value; }
+  static void reg_or()
+  {
+    *reinterpret_cast<volatile RegisterValueType*>(address) |= value;
+  }
 
-  static void reg_and() { *reinterpret_cast<volatile RegisterValueType*>(address) &= value; }
+  static void reg_and()
+  {
+    *reinterpret_cast<volatile RegisterValueType*>(address) &= value;
+  }
 
   static auto reg_get() -> RegisterValueType
   {

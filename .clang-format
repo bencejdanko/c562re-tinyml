@@ -12,7 +12,7 @@ NamespaceIndentation: None
 AccessModifierOffset: -2
 
 # Alignment & Spacing
-ColumnLimit: 100
+ColumnLimit: 80
 PointerAlignment: Left
 ReferenceAlignment: Left
 AlignConsecutiveAssignments: None

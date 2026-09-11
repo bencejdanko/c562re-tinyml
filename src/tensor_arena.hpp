@@ -29,16 +29,25 @@ struct TensorArena
   // Return the start of memory.
   // Ensure that it cannot be discarded to prevent memory leaks.
   // No exception overhead.
-  [[nodiscard]] const std::byte* data() const noexcept { return storage_.data(); }
+  [[nodiscard]] const std::byte* data() const noexcept
+  {
+    return storage_.data();
+  }
 
   // function that returns the current offset_
   [[nodiscard]] std::size_t used_bytes() const noexcept { return offset_; }
 
   // function to return capacity bytes
-  [[nodiscard]] constexpr std::size_t capacity() const noexcept { return CapacityBytes; }
+  [[nodiscard]] constexpr std::size_t capacity() const noexcept
+  {
+    return CapacityBytes;
+  }
 
   // functioning to return the remaining bytes
-  [[nodiscard]] std::size_t remaining_bytes() const noexcept { return CapacityBytes - offset_; }
+  [[nodiscard]] std::size_t remaining_bytes() const noexcept
+  {
+    return CapacityBytes - offset_;
+  }
 
   // set offset to 0
   constexpr void reset() noexcept { offset_ = 0U; }
@@ -67,11 +76,13 @@ struct TensorArena
     std::size_t byte_count = count * sizeof(T);
 
     // find the current raw pointer location within the storage_.
-    std::uintptr_t current_address = reinterpret_cast<std::uintptr_t>(storage_.data() + offset_);
+    std::uintptr_t current_address =
+        reinterpret_cast<std::uintptr_t>(storage_.data() + offset_);
 
     // align the current address up to required alignment.
     // here we apply the bitmask alignment formula.
-    std::uintptr_t aligned_address = (current_address + Alignment - 1U) & ~(Alignment - 1U);
+    std::uintptr_t aligned_address =
+        (current_address + Alignment - 1U) & ~(Alignment - 1U);
 
     // calculate the amount of bytes advanced to use for alignment padding
     std::size_t padding = aligned_address - current_address;

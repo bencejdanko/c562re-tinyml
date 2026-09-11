@@ -18,7 +18,8 @@ namespace pw::sys_io
 Status ReadByte(std::byte* dest)
 {
   uint8_t c = 0;
-  if (HAL_UART_Receive(mx_usart2_uart_gethandle(), &c, 1, HAL_MAX_DELAY) != HAL_OK)
+  if (HAL_UART_Receive(mx_usart2_uart_gethandle(), &c, 1, HAL_MAX_DELAY) !=
+      HAL_OK)
   {
     return Status::ResourceExhausted();
   }

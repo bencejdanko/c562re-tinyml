@@ -31,6 +31,23 @@ target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC
   # Add additional compiler flags here
 )
 
+file(GLOB FIRST_PARTY_CXX_SOURCES CONFIGURE_DEPENDS
+  ${CMAKE_SOURCE_DIR}/src/*.cpp
+  ${CMAKE_SOURCE_DIR}/tests/target/*.cpp
+)
+set_source_files_properties(${FIRST_PARTY_CXX_SOURCES} PROPERTIES COMPILE_OPTIONS
+  "-Wextra;-Wconversion;-Wsign-conversion;-Wshadow;-Wcast-align;-Wold-style-cast;-Wdouble-promotion"
+)
+
+target_include_directories(${CMAKE_PROJECT_NAME} SYSTEM PUBLIC
+  arch/cmsis/CMSIS/Core/Include
+  generated/hal
+  stm32c5xx_dfp/Include
+  stm32c5xx_drivers/hal
+  stm32c5xx_drivers/ll
+  stm32c5xx_drivers/timebases
+)
+
 target_link_options(${CMAKE_PROJECT_NAME} PUBLIC
   # Add additional linker flags here
 )

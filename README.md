@@ -20,7 +20,8 @@ tensor_arena.hpp            # 32-bit alignment tensor arena implementation
 ## Configuration
 
 `stm32c562xe_flash.ld` describes the physical datasheet for the linker.
-You can read ST's provided datasheet [here](https://www.st.com/en/microcontrollers-microprocessors/stm32c552re.html)
+
+[Datasheet](https://www.st.com/en/microcontrollers-microprocessors/stm32c552re.html)
 
 ## Requirements
 
@@ -59,4 +60,22 @@ cmake --build --preset debug_GCC_NUCLEO-C562RE --target format
 
 # Check formatting compliance without modifying files
 cmake --build --preset debug_GCC_NUCLEO-C562RE --target check-format
+```
+
+## Testing Procedure
+
+### Target Hardware Testing (STM32C562RE)
+
+```
+cmake --preset target_test_NUCLEO-C562RE
+cmake --build --preset target_test_NUCLEO-C562RE --target flash
+uv run pytest -s
+```
+
+### Host Testing
+
+```
+cmake -B build/host_test -S tests -G Ninja
+cmake --build build/host_test
+ctest --test-dir build/host_test --output-on-failure
 ```

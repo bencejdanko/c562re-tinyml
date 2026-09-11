@@ -14,17 +14,56 @@
 #include "pw_unit_test/simple_printing_event_handler.h"
 #include "tensor_arena.hpp"
 
-// MCU memory map is located at stm32c562xe_flash.ld (line 28)
-// Memory is between 0x200000000 and 0x20020000
+#include "mx_rcc.h"
+
+
+// sbbs: represents the beginning of BSS memory
+// ebss: represents the end of it
+// __StackLimit: The most the stack should extend before heap begins
+// __StackTop: The beginning of the stack writes
+extern "C" std::uint8_t _sbss[], _ebss[], __StackLimit[], __StackTop[];
+
+// Define TensorArena in .bss memory.
+// Ensure it exists within it's limits
+static TensorArena<1024> in_bss_tensor_arena{};
+TEST(TensorArenaSuite, ArenaLivesInBss)
+{
+  const auto addr = reinterpret_cast<std::uintptr_t>(in_bss_tensor_arena.data());
+  const auto bss_start = reinterpret_cast<std::uintptr_t>(_sbss);
+  const auto bss_end = reinterpret_cast<std::uintptr_t>(_ebss);
+
+  EXPECT_GE(addr, bss_start);
+  EXPECT_LE(addr + sizeof(in_bss_tensor_arena), bss_end);
+
+  // expect 32-bit alignment
+  EXPECT_EQ(addr % 32U, 0U);
+}
+
+// Verify stack memory placement
 TEST(TensorArenaSuite, VerifyStorageBufferPlacement)
 {
   TensorArena<1024> tensor_arena{};
   std::uintptr_t addr = reinterpret_cast<std::uintptr_t>(tensor_arena.data());
+  const auto stack_start = reinterpret_cast<std::uintptr_t>(__StackLimit);
+  const auto stack_end = reinterpret_cast<std::uintptr_t>(__StackTop);
 
-  EXPECT_GE(addr, 0x20000000UL);
-  EXPECT_LE(addr + 1024U, 0x20020000UL);
+  EXPECT_GE(addr, stack_start);
+  EXPECT_LE(addr + sizeof(tensor_arena), stack_end);
+  
+  // expect 32-bit alignment
   EXPECT_EQ(addr % 32U, 0U);
 }
+
+// Verify clock reconfiguring works
+// By default, the system starts at 144MHz
+
+TEST(ClockSuite, VerifyClockRetiming)
+{
+  mx_rcc_set_clock(CLOCK_PROFILE_144MHZ); // Should 
+  EXPECT_EQ((HAL_RCC_GetSYSCLKFreq()), 144'000'000U);
+}
+
+// Bit integrity and execution timing
 
 static void WriteStringToSysIo(std::string_view s, bool append_newline)
 {
